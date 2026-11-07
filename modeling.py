@@ -12,6 +12,7 @@ from sklearn.metrics import (
 )
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.tree import DecisionTreeClassifier
 
 
 def calculate_metrics(
@@ -37,10 +38,28 @@ def calculate_metrics(
 
 
 def make_logistic_regression_pipeline(features: pd.DataFrame) -> Pipeline:
+    return Pipeline(
+        steps=[
+            ("preprocessing", _make_preprocessor(features)),
+            ("classifier", LogisticRegression(max_iter=1000)),
+        ]
+    )
+
+
+def make_decision_tree_pipeline(features: pd.DataFrame) -> Pipeline:
+    return Pipeline(
+        steps=[
+            ("preprocessing", _make_preprocessor(features)),
+            ("classifier", DecisionTreeClassifier(random_state=42)),
+        ]
+    )
+
+
+def _make_preprocessor(features: pd.DataFrame) -> ColumnTransformer:
     numeric_columns = features.select_dtypes(include=["number"]).columns
     categorical_columns = features.columns.difference(numeric_columns)
 
-    preprocessing = ColumnTransformer(
+    return ColumnTransformer(
         transformers=[
             ("numeric", StandardScaler(), numeric_columns),
             (
@@ -48,11 +67,5 @@ def make_logistic_regression_pipeline(features: pd.DataFrame) -> Pipeline:
                 OneHotEncoder(handle_unknown="ignore"),
                 categorical_columns,
             ),
-        ]
-    )
-    return Pipeline(
-        steps=[
-            ("preprocessing", preprocessing),
-            ("classifier", LogisticRegression(max_iter=1000)),
         ]
     )
