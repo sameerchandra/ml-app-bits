@@ -10,6 +10,7 @@ from sklearn.metrics import (
     recall_score,
     roc_auc_score,
 )
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.tree import DecisionTreeClassifier
@@ -51,6 +52,15 @@ def make_decision_tree_pipeline(features: pd.DataFrame) -> Pipeline:
         steps=[
             ("preprocessing", _make_preprocessor(features)),
             ("classifier", DecisionTreeClassifier(random_state=42)),
+        ]
+    )
+
+
+def make_knn_pipeline(features: pd.DataFrame) -> Pipeline:
+    return Pipeline(
+        steps=[
+            ("preprocessing", _make_preprocessor(features)),
+            ("classifier", KNeighborsClassifier()),
         ]
     )
 
