@@ -14,6 +14,7 @@ from sklearn.metrics import (
 )
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
+from sklearn.svm import SVC
 from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
@@ -73,6 +74,15 @@ def make_naive_bayes_pipeline(features: pd.DataFrame) -> Pipeline:
             ("preprocessing", _make_preprocessor(features)),
             ("dense_features", FunctionTransformer(_to_dense)),
             ("classifier", GaussianNB()),
+        ]
+    )
+
+
+def make_svm_pipeline(features: pd.DataFrame) -> Pipeline:
+    return Pipeline(
+        steps=[
+            ("preprocessing", _make_preprocessor(features)),
+            ("classifier", SVC(probability=True, random_state=42)),
         ]
     )
 
