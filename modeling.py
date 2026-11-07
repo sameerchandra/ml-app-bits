@@ -1,6 +1,8 @@
 import pandas as pd
+from scipy import sparse
 from numpy.typing import ArrayLike
 from sklearn.compose import ColumnTransformer
+from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
     accuracy_score,
@@ -12,7 +14,7 @@ from sklearn.metrics import (
 )
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
 
@@ -63,6 +65,20 @@ def make_knn_pipeline(features: pd.DataFrame) -> Pipeline:
             ("classifier", KNeighborsClassifier()),
         ]
     )
+
+
+def make_naive_bayes_pipeline(features: pd.DataFrame) -> Pipeline:
+    return Pipeline(
+        steps=[
+            ("preprocessing", _make_preprocessor(features)),
+            ("dense_features", FunctionTransformer(_to_dense)),
+            ("classifier", GaussianNB()),
+        ]
+    )
+
+
+def _to_dense(features: object) -> object:
+    return features.toarray() if sparse.issparse(features) else features
 
 
 def _make_preprocessor(features: pd.DataFrame) -> ColumnTransformer:
