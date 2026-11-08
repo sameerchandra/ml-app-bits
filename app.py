@@ -52,15 +52,15 @@ else:
             st.error(f"The `{TARGET_COLUMN}` column must contain both classes.")
         else:
             metrics_by_model = {}
-            model_by_name = {}
+            loaded_models = {}
             expected_features = None
 
-            for name, path in MODEL_PATHS.items():
-                if not path.is_file():
-                    st.error(f"Saved model is missing: `{path}`.")
+            for name, model_path in MODEL_PATHS.items():
+                if not model_path.is_file():
+                    st.error(f"Saved model is missing: `{model_path}`.")
                     st.stop()
 
-                model = load_model(str(path))
+                model = load_model(str(model_path))
                 model_features = list(model.feature_names_in_)
                 if expected_features is None:
                     expected_features = model_features
@@ -68,34 +68,34 @@ else:
                     st.error("Saved models do not use the same input feature schema.")
                     st.stop()
 
-                model_by_name[name] = model
+                loaded_models[name] = model
 
-            actual_features = set(test_data.columns) - {TARGET_COLUMN}
-            expected_feature_set = set(expected_features)
-            missing_features = sorted(expected_feature_set - actual_features)
-            unexpected_features = sorted(actual_features - expected_feature_set)
+            uploaded_features = set(test_data.columns) - {TARGET_COLUMN}
+            required_features = set(expected_features)
+            missing_features = sorted(required_features - uploaded_features)
+            unexpected_features = sorted(uploaded_features - required_features)
             if missing_features or unexpected_features:
-                details = []
+                problems = []
                 if missing_features:
-                    details.append(f"Missing features: {', '.join(missing_features)}.")
+                    problems.append(f"Missing features: {', '.join(missing_features)}.")
                 if unexpected_features:
-                    details.append(f"Unexpected columns: {', '.join(unexpected_features)}.")
-                st.error(" ".join(details))
+                    problems.append(f"Unexpected columns: {', '.join(unexpected_features)}.")
+                st.error(" ".join(problems))
                 st.stop()
 
-            x_test = test_data[expected_features]
-            y_test = test_data[TARGET_COLUMN]
-            for name, model in model_by_name.items():
+            test_features = test_data[expected_features]
+            test_labels = test_data[TARGET_COLUMN]
+            for name, model in loaded_models.items():
                 classes = list(model.classes_)
                 if len(classes) != 2 or True not in classes:
                     st.error(f"Saved model `{name}` does not have the expected binary classes.")
                     st.stop()
 
-                positive_index = classes.index(True)
+                purchase_column = classes.index(True)
                 metrics_by_model[name] = calculate_metrics(
-                    y_test,
-                    model.predict(x_test),
-                    model.predict_proba(x_test)[:, positive_index],
+                    test_labels,
+                    model.predict(test_features),
+                    model.predict_proba(test_features)[:, purchase_column],
                     positive_label=True,
                 )
 
@@ -110,12 +110,12 @@ else:
                 use_container_width=True,
             )
 
-            selected_model = model_by_name[model_name]
-            predictions = selected_model.predict(x_test)
+            selected_model = loaded_models[model_name]
+            predictions = selected_model.predict(test_features)
             st.subheader(f"{model_name} details")
             st.dataframe(
                 pd.DataFrame(
-                    confusion_matrix(y_test, predictions, labels=[False, True]),
+                    confusion_matrix(test_labels, predictions, labels=[False, True]),
                     index=["Actual: no purchase", "Actual: purchase"],
                     columns=["Predicted: no purchase", "Predicted: purchase"],
                 ),
