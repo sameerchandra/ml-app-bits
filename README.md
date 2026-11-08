@@ -35,29 +35,29 @@ The UCI dataset is licensed under CC BY 4.0.
 ## d. Models used
 
 The dataset is split once into 80% training and 20% test data using stratified
-sampling (`random_state=42`). Preprocessing is fitted as part of each model
+sampling (`random_state=2026`). Preprocessing is fitted as part of each model
 pipeline on the training data only. The table reports results on the same
 held-out test rows. AUC uses the predicted probability for the positive class,
 `Revenue=True`.
 
 | ML Model Name | Accuracy | AUC | Precision | Recall | F1 | MCC |
 |---|---:|---:|---:|---:|---:|---:|
-| Logistic Regression | 0.881 | 0.888 | 0.743 | 0.356 | 0.481 | 0.460 |
-| Decision Tree | 0.856 | 0.725 | 0.534 | 0.537 | 0.535 | 0.450 |
-| K-Nearest Neighbors | 0.873 | 0.782 | 0.646 | 0.401 | 0.494 | 0.442 |
-| Gaussian Naive Bayes | 0.674 | 0.793 | 0.294 | 0.788 | 0.428 | 0.323 |
-| Support Vector Machine | 0.887 | 0.874 | 0.707 | 0.461 | 0.558 | 0.511 |
+| Logistic Regression | 0.878 | 0.880 | 0.716 | 0.356 | 0.476 | 0.448 |
+| Decision Tree | 0.874 | 0.763 | 0.591 | 0.602 | 0.597 | 0.522 |
+| K-Nearest Neighbors | 0.871 | 0.789 | 0.647 | 0.374 | 0.474 | 0.427 |
+| Gaussian Naive Bayes | 0.684 | 0.797 | 0.298 | 0.770 | 0.430 | 0.324 |
+| Support Vector Machine | 0.886 | 0.872 | 0.710 | 0.448 | 0.549 | 0.505 |
 
 ### Observations
 
 | ML Model Name | Observation about model performance |
 |---|---|
-| Logistic Regression | Highest AUC (0.888) and precision (0.743), but recall is 0.356. Its default decision threshold misses many purchase sessions. |
-| Decision Tree | Recall (0.537) and precision (0.534) are more balanced than the logistic model, but its AUC (0.725) is lowest, indicating weaker ranking performance on this split. |
-| K-Nearest Neighbors | Reaches 0.873 accuracy and 0.646 precision, with 0.401 recall. Its MCC (0.442) is lower than those of Logistic Regression and the Decision Tree. |
-| Gaussian Naive Bayes | Highest recall (0.788), but precision is only 0.294 and accuracy is 0.674. It finds more purchases at the cost of more false purchase predictions. |
-| Support Vector Machine | Highest accuracy (0.887), F1 (0.558), and MCC (0.511). It has a more balanced precision/recall trade-off than the other models with strong overall results on this split. |
-| Overall, Winner for your dataset? | **Support Vector Machine**, when selecting by the strongest combined F1 and MCC on this held-out split. If maximizing purchase recall is the priority, Gaussian Naive Bayes is the alternative. The winner depends on the costs of missed purchases versus false alarms. |
+| Logistic Regression | Highest AUC (0.880) and strong precision (0.716), but recall is 0.356. Its default decision threshold misses many purchase sessions. |
+| Decision Tree | Highest recall (0.602), F1 (0.597), and MCC (0.522), with 0.591 precision. These results provide the most balanced positive-class performance on this split. |
+| K-Nearest Neighbors | Reaches 0.871 accuracy and 0.647 precision, with 0.374 recall. Its F1 (0.474) and MCC (0.427) are lower than the Decision Tree and SVM. |
+| Gaussian Naive Bayes | Highest recall after the Decision Tree (0.770), but precision is 0.298 and accuracy is 0.684. It finds more purchases at the cost of more false purchase predictions. |
+| Support Vector Machine | Highest accuracy (0.886) and precision (0.710), with 0.448 recall and 0.549 F1. It performs strongly overall but has lower F1 and MCC than the Decision Tree on this split. |
+| Overall, Winner for your dataset? | **Decision Tree**, when selecting by F1 and MCC on this held-out split. If ranking quality is the priority, Logistic Regression has the highest AUC; if accuracy and precision matter most, SVM is strongest. The winner depends on the costs of missed purchases versus false alarms. |
 
 ## Run locally
 

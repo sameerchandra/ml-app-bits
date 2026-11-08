@@ -12,6 +12,6 @@ def split_dataset(
         data.drop(columns=[target_column]),
         data[target_column],
         test_size=0.2,
-        random_state=42,
+        random_state=2026,
         stratify=data[target_column],
     )
